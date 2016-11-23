@@ -17,7 +17,7 @@ You can install `Watchdog` and `GitPython` by running the following command:
 This script was intended to be setup in the Windows Task Scheduler and executed at startup.
 To execute the script, navigate to the `src` directory and run the following command:
 ```
-  $ python HerokuFileUpdaterPDF.py author_name author_email commit_message git_directory directory_to_watch destination_directories
+  $ python FileUpdaterPDF.py author_name author_email commit_message git_directory directory_to_watch destination_directories
 ```
 
 ### Arguments:
