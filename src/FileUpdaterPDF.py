@@ -14,15 +14,15 @@ from watchdog.events import PatternMatchingEventHandler
 """
 
 
-class HerokuFileUpdaterPDF(PatternMatchingEventHandler):
+class FileUpdaterPDF(PatternMatchingEventHandler):
     # Change this to include other specific extensions.
     patterns = ["*.pdf"]
 
     def __init__(self, author_name, author_email, commit_message, git_directory, destinations):
         """
-            Construct a HerokuFileUpdaterPDF.
+            Construct a FileUpdaterPDF.
         """
-        super(HerokuFileUpdaterPDF, self).__init__()
+        super(FileUpdaterPDF, self).__init__()
         self.git_directory = git_directory
         self.destinations = destinations
         self.author_name = author_name
@@ -101,9 +101,9 @@ def main():
     source_path = sys.argv[5]
     destinations = sys.argv[6:]
 
-    # Run WatchDog with HerokuFileUpdaterPDF.
+    # Run WatchDog with FileUpdaterPDF.
     observer = Observer()
-    observer.schedule(HerokuFileUpdaterPDF(
+    observer.schedule(FileUpdaterPDF(
         author_name, author_email, commit_message, git_directory, destinations), source_path)
     observer.start()
 
