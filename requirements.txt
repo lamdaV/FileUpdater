@@ -1,0 +1,5 @@
+# src\HerokuFileUpdaterPDF.py: 6
+GitPython == 2.1.0
+
+# src\HerokuFileUpdaterPDF.py: 7,8
+watchdog == 0.8.3
