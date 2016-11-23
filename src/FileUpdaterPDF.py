@@ -8,14 +8,14 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 """
-    HerokuFileUpdaterPDF watches for creations and modifications of pdf files at the scheduled source and moves them to the destination.
+    FileUpdaterPDF watches for creations and modifications of pdf files at the scheduled source and moves them to the destination.
 
-    Note: The destination should contain the new name Example: /path/some-new-name.pdf
+    Note: The destination should contain the new name if needed. Example: /path/some-new-name.pdf
 """
 
 
 class HerokuFileUpdaterPDF(PatternMatchingEventHandler):
-    # Change this to include the specific extensions.
+    # Change this to include other specific extensions.
     patterns = ["*.pdf"]
 
     def __init__(self, author_name, author_email, commit_message, git_directory, destinations):
@@ -63,7 +63,8 @@ class HerokuFileUpdaterPDF(PatternMatchingEventHandler):
 
         # Commit.
         committer = Actor(self.author_name, self.author_email)
-        index.commit(self.commit_message, author=committer, committer=committer)
+        index.commit(self.commit_message,
+                     author=committer, committer=committer)
 
         # Push.
         for remote in repo.remotes:
@@ -89,7 +90,7 @@ def main():
     if (len(sys.argv) < 7):
         print("[ ERROR ] missing parameters")
         print(
-            "HerokuFileUpdaterPDF.py author_name author_email commit_message /path/to/git/directory  /path/to/watch/directory /path/to/destination/directory...")
+            "FileUpdaterPDF.py author_name author_email commit_message /path/to/git/directory  /path/to/watch/directory /path/to/destination/directory...")
         return
 
     # Parse arguments from command line.
