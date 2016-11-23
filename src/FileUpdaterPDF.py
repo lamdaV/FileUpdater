@@ -15,9 +15,10 @@ from watchdog.events import PatternMatchingEventHandler
 
 
 class HerokuFileUpdaterPDF(PatternMatchingEventHandler):
+    # Change this to include the specific extensions.
     patterns = ["*.pdf"]
 
-    def __init__(self, author_name, author_email, message, git_directory, destinations):
+    def __init__(self, author_name, author_email, commit_message, git_directory, destinations):
         """
             Construct a HerokuFileUpdaterPDF.
         """
@@ -26,7 +27,7 @@ class HerokuFileUpdaterPDF(PatternMatchingEventHandler):
         self.destinations = destinations
         self.author_name = author_name
         self.author_email = author_email
-        self.message = message
+        self.commit_message = commit_message
 
     def process(self, event):
         """
@@ -62,7 +63,7 @@ class HerokuFileUpdaterPDF(PatternMatchingEventHandler):
 
         # Commit.
         committer = Actor(self.author_name, self.author_email)
-        index.commit(self.message, author=committer, committer=committer)
+        index.commit(self.commit_message, author=committer, committer=committer)
 
         # Push.
         for remote in repo.remotes:
@@ -88,13 +89,13 @@ def main():
     if (len(sys.argv) < 7):
         print("[ ERROR ] missing parameters")
         print(
-            "HerokuFileUpdaterPDF.py author_name author_email /path/to/git/directory  /path/to/watch/directory /path/to/destination/directory...")
+            "HerokuFileUpdaterPDF.py author_name author_email commit_message /path/to/git/directory  /path/to/watch/directory /path/to/destination/directory...")
         return
 
     # Parse arguments from command line.
     author_name = sys.argv[1]
     author_email = sys.argv[2]
-    message = sys.argv[3]
+    commit_message = sys.argv[3]
     git_directory = sys.argv[4]
     source_path = sys.argv[5]
     destinations = sys.argv[6:]
@@ -102,7 +103,7 @@ def main():
     # Run WatchDog with HerokuFileUpdaterPDF.
     observer = Observer()
     observer.schedule(HerokuFileUpdaterPDF(
-        author_name, author_email, message, git_directory, destinations), source_path)
+        author_name, author_email, commit_message, git_directory, destinations), source_path)
     observer.start()
 
     # Print some initial information.
