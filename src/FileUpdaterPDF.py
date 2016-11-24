@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import sys
 import os.path
+import argparse
 from git import Repo, Actor
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
@@ -44,8 +45,10 @@ class FileUpdaterPDF(PatternMatchingEventHandler):
         print(event.src_path, event.event_type)
 
         # Copy the file to the destination
+        print("Copying files...", end="")
         for destination in self.destinations:
             shutil.copy(event.src_path, destination)
+        print("Done")
 
         # Push to master
         self.git_process()
@@ -55,22 +58,30 @@ class FileUpdaterPDF(PatternMatchingEventHandler):
             Push update to git.
         """
         # Setup Repo.
+        print("Getting Index...", end="")
         repo = Repo(self.git_directory)
         index = repo.index
+        print("Done")
 
         # Add files.
+        print("Adding files...", end="")
         index.add(self.destinations)
+        print("Done")
 
         # Commit.
+        print("Commiting...", end="")
         committer = Actor(self.author_name, self.author_email)
         index.commit(self.commit_message,
                      author=committer, committer=committer)
+        print("Done")
 
         # Push.
+        print("Pushing to Git...", end="")
         for remote in repo.remotes:
             if (remote.name == "origin"):
                 remote.push()
                 break
+        print("Done")
 
     def on_modified(self, event):
         """
@@ -86,30 +97,34 @@ class FileUpdaterPDF(PatternMatchingEventHandler):
 
 
 def main():
-    # Detect required arguments met.
-    if (len(sys.argv) < 7):
-        print("[ ERROR ] missing parameters")
-        print(
-            "FileUpdaterPDF.py author_name author_email commit_message /path/to/git/directory  /path/to/watch/directory /path/to/destination/directory...")
-        return
+    # Setup the argument parser.
+    parser = argparse.ArgumentParser(
+        description="Watch a source directory for PDF modifications or creations, move PDF file to the destination directory, and push to Git")
+    parser.add_argument("-n", "--author_name",
+                        help="author of the commit", required=True)
+    parser.add_argument("-e", "--author_email",
+                        help="author's email", required=True)
+    parser.add_argument("-m", "--commit_message",
+                        help="the message associated with the commit", required=True)
+    parser.add_argument("-g", "--git_directory",
+                        help="the base Git directory of the destination", required=True)
+    parser.add_argument("-s", "--source_path",
+                        help="the directory to watch", required=True)
+    parser.add_argument("-d", "--destinations",
+                        help="the destination(s) of the file", nargs="+")
 
-    # Parse arguments from command line.
-    author_name = sys.argv[1]
-    author_email = sys.argv[2]
-    commit_message = sys.argv[3]
-    git_directory = sys.argv[4]
-    source_path = sys.argv[5]
-    destinations = sys.argv[6:]
+    # Parse arguments.
+    arguments = parser.parse_args()
 
     # Run WatchDog with FileUpdaterPDF.
     observer = Observer()
     observer.schedule(FileUpdaterPDF(
-        author_name, author_email, commit_message, git_directory, destinations), source_path)
+        arguments.author_name, arguments.author_email, arguments.commit_message, arguments.git_directory, arguments.destinations), arguments.source_path)
     observer.start()
 
     # Print some initial information.
-    print("Observation starting...")
     print("Ctrl-C to stop")
+    print("Observation starting...")
 
     # Run indefinitely. Stop if Ctrl-C.
     try:
