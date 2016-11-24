@@ -1,34 +1,31 @@
 import time
 import shutil
-import subprocess
-import sys
-import os.path
 import argparse
 from git import Repo, Actor
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 """
-    FileUpdaterPDF watches for creations and modifications of pdf files at the scheduled source and moves them to the destination.
+    FileUpdater watches for creations and modifications of pdf files at the scheduled source and moves them to the destination.
 
     Note: The destination should contain the new name if needed. Example: /path/some-new-name.pdf
 """
 
 
-class FileUpdaterPDF(PatternMatchingEventHandler):
-    # Change this to include other specific extensions.
-    patterns = ["*.pdf"]
+class FileUpdater(PatternMatchingEventHandler):
+    patterns = []
 
-    def __init__(self, author_name, author_email, commit_message, git_directory, destinations):
+    def __init__(self, author_name, author_email, commit_message, git_directory, destinations, pattern_matcher):
         """
-            Construct a FileUpdaterPDF.
+            Construct a FileUpdater.
         """
-        super(FileUpdaterPDF, self).__init__()
+        super(FileUpdater, self).__init__()
         self.git_directory = git_directory
         self.destinations = destinations
         self.author_name = author_name
         self.author_email = author_email
         self.commit_message = commit_message
+        self.patterns += pattern_matcher
 
     def process(self, event):
         """
@@ -111,15 +108,17 @@ def main():
     parser.add_argument("-s", "--source_path",
                         help="the directory to watch", required=True)
     parser.add_argument("-d", "--destinations",
-                        help="the destination(s) of the file", nargs="+")
+                        help="the destination(s) of the file", nargs="+", required=True)
+    parser.add_argument("-p", "--pattern_matcher",
+                        help="file pattern to match in source directory", nargs="+", required=True)
 
     # Parse arguments.
     arguments = parser.parse_args()
 
-    # Run WatchDog with FileUpdaterPDF.
+    # Run WatchDog with FileUpdater.
     observer = Observer()
-    observer.schedule(FileUpdaterPDF(
-        arguments.author_name, arguments.author_email, arguments.commit_message, arguments.git_directory, arguments.destinations), arguments.source_path)
+    observer.schedule(FileUpdater(
+        arguments.author_name, arguments.author_email, arguments.commit_message, arguments.git_directory, arguments.destinations, arguments.pattern_matcher), arguments.source_path)
     observer.start()
 
     # Print some initial information.
