@@ -48,7 +48,9 @@ class FileUpdater(PatternMatchingEventHandler):
         print("Done")
 
         # Push to master
-        self.git_process()
+        if (self.git_directory != None):
+            print("testing")
+            self.git_process()
 
     def git_process(self):
         """
@@ -98,13 +100,13 @@ def main():
     parser = argparse.ArgumentParser(
         description="Watch a source directory for PDF modifications or creations, move PDF file to the destination directory, and push to Git")
     parser.add_argument("-n", "--author_name",
-                        help="author of the commit", required=True)
+                        help="author of the commit")
     parser.add_argument("-e", "--author_email",
-                        help="author's email", required=True)
+                        help="author's email")
     parser.add_argument("-m", "--commit_message",
-                        help="the message associated with the commit", required=True)
+                        help="the message associated with the commit")
     parser.add_argument("-g", "--git_directory",
-                        help="the base Git directory of the destination", required=True)
+                        help="the base Git directory of the destination")
     parser.add_argument("-s", "--source_path",
                         help="the directory to watch", required=True)
     parser.add_argument("-d", "--destinations",
@@ -115,10 +117,18 @@ def main():
     # Parse arguments.
     arguments = parser.parse_args()
 
+    # If a git_directory is provided, ensure that author_name, author_email,
+    # and a commit_message was provided.
+    if (arguments.git_directory != None):
+        if (arguments.author_name == None or arguments.author_email == None or arguments.commit_message == None):
+            print(
+                "[ ERROR ]: git directory was specified without an author_name, author_email, or commit_message.")
+            return
+
     # Run WatchDog with FileUpdater.
     observer = Observer()
-    observer.schedule(FileUpdater(
-        arguments.author_name, arguments.author_email, arguments.commit_message, arguments.git_directory, arguments.destinations, arguments.pattern_matcher), arguments.source_path)
+    observer.schedule(FileUpdater(arguments.author_name, arguments.author_email, arguments.commit_message,
+                                  arguments.git_directory, arguments.destinations, arguments.pattern_matcher), arguments.source_path)
     observer.start()
 
     # Print some initial information.
