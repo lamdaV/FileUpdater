@@ -31,11 +31,15 @@ $ python FileUpdater.py -n "David Lam" -e "some_email@xyz.com" -m "updating cool
 ```
 
 ### Arguments:
-
-- author_name: A String of the author and committer of the update.
-- author_email: A String of the author and committer's email.
-- commit_message: A String of the message associated with the Git commit.
-- git_directory: A String of the path to the git directory the files will be moved to.
+#### Required:
 - directory_to_watch: A String of the path of the directory the script will listen to.
 - destination_directories: A list of space separated Strings (must include at least 1) of the path to which to move the updated file(s) to. This can include a new name of the file if needed. For example: if a file was originally called `apple.pdf`, you could specify the path `/some_path/orange.pdf` to be the new name of the copied file.
 - pattern_matcher: A list of space separated regular expression Strings (must include at least 1).
+
+#### Optional:
+- git_directory: A String of the path to the git directory the files will be moved to.
+- author_name: A String of the author and committer of the update. Required only if git_directory argument provided.
+- author_email: A String of the author and committer's email. Required only if git_directory argument provided.
+- commit_message: A String of the message associated with the Git commit. Required only if git_directory argument provided.
+
+
