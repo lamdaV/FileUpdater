@@ -49,7 +49,6 @@ class FileUpdater(PatternMatchingEventHandler):
 
         # Push to master
         if (self.git_directory != None):
-            print("testing")
             self.git_process()
 
     def git_process(self):
